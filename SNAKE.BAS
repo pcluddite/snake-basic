@@ -9,7 +9,7 @@ CLS
 LOCATE 2, 5
 PRINT "Copytight (c) 2013 Tim Baxendale"
 LOCATE 12, 11
-PRINT "SNAKE [Version 1.0]"
+PRINT "SNAKE [Version 1.1]"
 LOCATE 24, 8
 PRINT "Press any key to start..."
 DO
@@ -17,11 +17,11 @@ LOOP WHILE INKEY$ = ""
 
 CLS
 
-xmove% = 10
+xmove% = 20
 ymove% = 0
 DIM bodyX%(255)
 DIM bodyY%(255)
-size% = 30
+size% = 10
 FOR i% = 0 TO size%
   bodyX%(i%) = 140
   bodyY%(i%) = 80
@@ -41,24 +41,24 @@ WHILE 1
     CASE CHR$(27)
       END
     CASE CHR$(0) + "H"
-      IF ymove% <> 10 THEN
-        ymove% = -10
+      IF ymove% <> 20 THEN
+        ymove% = -20
         xmove% = 0
       END IF
     CASE CHR$(0) + "P"
-      IF ymove% <> -10 THEN
-        ymove% = 10
+      IF ymove% <> -20 THEN
+        ymove% = 20
         xmove% = 0
       END IF
     CASE CHR$(0) + "K"
-      IF xmove% <> 10 THEN
+      IF xmove% <> 20 THEN
         ymove% = 0
-        xmove% = -10
+        xmove% = -20
       END IF
     CASE CHR$(0) + "M"
-      IF xmove% <> -10 THEN
+      IF xmove% <> -20 THEN
         ymove% = 0
-        xmove% = 10
+        xmove% = 20
       END IF
   END SELECT
 
@@ -66,19 +66,19 @@ WHILE 1
   IF TIMER - t# > 5 AND foodOut% = 0 THEN
     t# = TIMER
     foodOut% = 1
-    foodPos%(0) = Rand(0, 200)
-    foodPos%(1) = Rand(10, 180)
+    foodPos%(0) = Rand(0, 10) * 20
+    foodPos%(1) = Rand(1, 9) * 20
   END IF
 
   'Is the food out?
   IF foodOut% = 1 THEN
-    CIRCLE (foodPos%(0), foodPos%(1)), 5, 1
+    CIRCLE (foodPos%(0), foodPos%(1)), 10, 1
     'RECT foodPos%(0), foodPos%(1), 10, 10, 3
     PAINT (foodPos%(0), foodPos%(1)), 1, 1
   END IF
   
   'Did ya get it?
-  IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 10, 10, foodPos%(0) - 5, foodPos%(1) - 5) OR intersects(bodyX%(size%), bodyY%(size%), 10, 10, foodPos%(0) + 5, foodPos%(1) + 5)) THEN
+  IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 20, 20, foodPos%(0) - 10, foodPos%(1) - 10) OR intersects(bodyX%(size%), bodyY%(size%), 20, 20, foodPos%(0) + 10, foodPos%(1) + 10)) THEN
     PAINT (foodPos%(0), foodPos%(1)), 0, 0
     size% = size% + 1
     bodyX%(size%) = bodyX%(size% - 1)
@@ -88,7 +88,7 @@ WHILE 1
   END IF
 
   'Erase the tail
-  RECT bodyX%(0), bodyY%(0), 10, 10, 0
+  RECT bodyX%(0), bodyY%(0), 20, 20, 0
 
   'Sort the body arrays
   FOR i% = 0 TO size%
@@ -103,25 +103,25 @@ WHILE 1
   'Wrap around Y
   SELECT CASE bodyY%(size%)
     CASE 200
-      bodyY%(size%) = 10
+      bodyY%(size%) = 20
     CASE 0
-      bodyY%(size%) = 190
+      bodyY%(size%) = 180
   END SELECT
   'Wrap around X
   SELECT CASE bodyX%(size%)
-    CASE -10
-      bodyX%(size%) = 310
+    CASE -20
+      bodyX%(size%) = 300
     CASE 320
       bodyX%(size%) = 0
   END SELECT
 
   'Paint the damn thing and don't eat me!
   FOR i% = size% TO 0 STEP -1
-    RECT bodyX%(i%), bodyY%(i%), 10, 10, 2
+    RECT bodyX%(i%), bodyY%(i%), 20, 20, 2
     IF i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%) THEN
       PALETTE 2, 4
       PALETTE 3, 15
-      RECT bodyX%(0), bodyY%(0), 10, 10, 2
+      RECT bodyX%(0), bodyY%(0), 20, 20, 2
       LOCATE 12, 16
       PRINT "You Died!"
       SOUND 37, 18
@@ -136,8 +136,8 @@ WHILE 1
 
   'Show me da score!
   LOCATE 1, 1
-  PRINT "Score: ", (size% - 30) * 5
-  LINE (0, 9)-(320, 9), 3
+  PRINT "Score: ", (size% - 10) * 5
+  LINE (0, 15)-(320, 15), 3
 WEND
 
 SUB delay (ticks%)
@@ -147,7 +147,7 @@ SUB delay (ticks%)
   NEXT i%
 END SUB
 
-FUNCTION FOOD
+FUNCTION FOOD ()
         
   x% = Rand(0, 200)
   y% = Rand(0, 180)
