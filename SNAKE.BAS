@@ -1,5 +1,5 @@
 DECLARE FUNCTION RandomName$ ()
-DECLARE SUB HIGHSCORE (Score%)
+DECLARE SUB HIGHSCORE (score%)
 DECLARE SUB QuickSort (LOW%, HIGH%)
 DECLARE FUNCTION RandInt% (lower%, Upper%)
 DECLARE FUNCTION intersects! (x1%, y1%, w1%, h1%, x2%, y2%)
@@ -7,32 +7,42 @@ DECLARE FUNCTION FOOD! ()
 DECLARE FUNCTION Rand! (Bottom!, Top!)
 DECLARE SUB delay (ticks%)
 DECLARE SUB RECT (x%, y%, W%, H%, C%)
-SCREEN 1
+SCREEN 7
 CLS
 
 TYPE Player
-  Score AS INTEGER
+  score AS INTEGER
   Nomen AS STRING * 10
+  Colr AS INTEGER
 END TYPE
 
 DIM SHARED SortArray(10) AS Player
 
 LOCATE 2, 5
+COLOR 1, 0
 PRINT "Copytight (c) 2013 Tim Baxendale"
-LOCATE 12, 11
-PRINT "SNAKE [Version 2.0]"
+COLOR 15, 0
+RECT -1, 67, 321, 50, 2
+LOCATE 12, 16
+PRINT "SNAKE 3.0!"
 LOCATE 24, 8
+COLOR 4, 0
 PRINT "Press any key to start..."
 DO
 LOOP WHILE INKEY$ = ""
 
+START:
+
+COLOR 15, 0
 CLS
 
-xmove% = 20
+xmove% = 10
 ymove% = 0
-DIM bodyX%(255)
-DIM bodyY%(255)
-size% = 7
+DIM bodyX%(511)
+DIM bodyY%(511)
+DIM score AS INTEGER
+score = 0
+size% = 5
 FOR i% = 0 TO size%
   bodyX%(i%) = 140
   bodyY%(i%) = 80
@@ -41,35 +51,32 @@ NEXT
 foodOut% = 0
 DIM foodPos%(1)
 t# = TIMER
-PALETTE 1, 2
-PALETTE 2, 15
-PALETTE 3, 1
 
 WHILE 1
   'Get the pressed key
   key$ = INKEY$
   SELECT CASE key$
-    CASE CHR$(27)
-      END
+    'CASE CHR$(27)
+    '  END
     CASE CHR$(0) + "H"
-      IF ymove% <> 20 THEN
-        ymove% = -20
+      IF ymove% <> 10 THEN
+        ymove% = -10
         xmove% = 0
       END IF
     CASE CHR$(0) + "P"
-      IF ymove% <> -20 THEN
-        ymove% = 20
+      IF ymove% <> -10 THEN
+        ymove% = 10
         xmove% = 0
       END IF
     CASE CHR$(0) + "K"
-      IF xmove% <> 20 THEN
+      IF xmove% <> 10 THEN
         ymove% = 0
-        xmove% = -20
+        xmove% = -10
       END IF
     CASE CHR$(0) + "M"
-      IF xmove% <> -20 THEN
+      IF xmove% <> -10 THEN
         ymove% = 0
-        xmove% = 20
+        xmove% = 10
       END IF
     CASE " "
       LOCATE 1, 1
@@ -88,23 +95,25 @@ WHILE 1
 
   'Is the food out?
   IF foodOut% = 1 THEN
-    'CIRCLE (foodPos%(0), foodPos%(1)), 10, 1
-    RECT foodPos%(0), foodPos%(1), 10, 10, 1
-    PAINT (foodPos%(0) + 1, foodPos%(1) + 1), 1, 1
+    RECT foodPos%(0) + 1, foodPos%(1) + 1, 8, 8, 4
+    PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 4, 4
   END IF
   
   'Did ya get it?
-  IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 20, 20, foodPos%(0) - 10, foodPos%(1) - 10) OR intersects(bodyX%(size%), bodyY%(size%), 20, 20, foodPos%(0) + 10, foodPos%(1) + 10)) THEN
-    PAINT (foodPos%(0), foodPos%(1)), 0, 0
-    size% = size% + 1
-    bodyX%(size%) = bodyX%(size% - 1)
-    bodyY%(size%) = bodyY%(size% - 1)
+  IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0), foodPos%(1)) OR intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0) + 4, foodPos%(1) + 4)) THEN
+    PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 1, 0
+    FOR i% = 0 TO 3
+      size% = size% + 1
+      bodyX%(size%) = bodyX%(size% - 1)
+      bodyY%(size%) = bodyY%(size% - 1)
+    NEXT
     foodOut% = 0
+    score = score + 5
     SOUND 300, 1
   END IF
 
   'Erase the tail
-  RECT bodyX%(0), bodyY%(0), 20, 20, 0
+  PAINT (bodyX%(0) + 2, bodyY%(0) + 2), 0, 0
 
   'Sort the body arrays
   FOR i% = 0 TO size%
@@ -116,45 +125,39 @@ WHILE 1
   bodyX%(size%) = bodyX%(size% - 1) + xmove%
   bodyY%(size%) = bodyY%(size% - 1) + ymove%
  
-  'Wrap around Y
-  SELECT CASE bodyY%(size%)
-    CASE 200
-      bodyY%(size%) = 20
-    CASE 0
-      bodyY%(size%) = 180
-  END SELECT
-  'Wrap around X
-  SELECT CASE bodyX%(size%)
-    CASE -20
-      bodyX%(size%) = 300
-    CASE 320
-      bodyX%(size%) = 0
-  END SELECT
-
-  'Paint the damn thing and don't eat me!
+  'Draw the damn thing
+  RECT bodyX%(size%) + 1, bodyY%(size%) + 1, 8, 8, 1
+  PAINT (bodyX%(size%) + 2, bodyY%(size%) + 2), 1, 1
+ 
+  'Don't eat me!
   FOR i% = size% TO 0 STEP -1
-    RECT bodyX%(i%), bodyY%(i%), 20, 20, 2
-    IF i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%) THEN
-      PALETTE 2, 4
-      PALETTE 3, 15
-      RECT bodyX%(0), bodyY%(0), 20, 20, 2
-      LOCATE 12, 16
-      PRINT "You Died!"
-      SOUND 37, 18
-      LOCATE 23, 7
-      PRINT "Press any key to continue..."
-      DO
-      LOOP WHILE INKEY$ = ""
-      HIGHSCORE ((size% - 7) * 5)
+    'RECT bodyX%(i%) + 1, bodyY%(i%) + 1, 8, 8, 1
+    'PAINT (bodyX%(i%) + 2, bodyY%(i%) + 2), 1, 1
+    IF (i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%)) OR (bodyX%(i%) > 310 OR bodyX%(i%) < 0) OR (bodyY%(i%) > 190 OR bodyY%(i%) < 10) THEN
+      GOTO DEAD
     END IF
   NEXT
-  delay (3)
+  delay (2)
 
   'Show me da score!
   LOCATE 1, 1
-  PRINT "Score: ", (size% - 7) * 5
-  LINE (0, 15)-(320, 15), 3
+  PRINT "Score: ", score
+  LINE (0, 9)-(320, 9), 2
 WEND
+
+DEAD:
+PALETTE 0, 4
+COLOR 15, 4
+LOCATE 12, 16
+PRINT "You Died!"
+SOUND 37, 18
+LOCATE 23, 7
+PRINT "Press space to continue..."
+DO
+LOOP WHILE INKEY$ <> " "
+COLOR 15, 0
+HIGHSCORE score
+GOTO START
 
 SUB delay (ticks%)
   FOR i% = 1 TO ticks%
@@ -171,13 +174,14 @@ FUNCTION FOOD ()
   
 END FUNCTION
 
-SUB HIGHSCORE (Score%)
+SUB HIGHSCORE (score%)
 DIM p AS Player
 OPEN "SCORE.DAT" FOR RANDOM AS #1
 IF LOF(1) <= 0 THEN
   FOR i = 1 TO 10
     p.Nomen = RandomName$
-    p.Score = Rand(1, 20) * 5
+    p.score = Rand(1, 20) * 5
+    p.Colr = 1
     PUT #1, i, p
   NEXT
 END IF
@@ -189,7 +193,7 @@ ISHIGHSCORE = 0
 FOR i = 1 TO 10
   GET #1, i, p
   SortArray(i) = p
-  IF p.Score < Score% THEN
+  IF p.score < score% THEN
     ISHIGHSCORE = 1
   END IF
 NEXT
@@ -201,7 +205,8 @@ IF ISHIGHSCORE = 1 THEN
   INPUT "Please enter your name: ", Nomen$
   LOOP WHILE LEN(Nomen$) = 0 OR LEN(Nomen$) > 10
   newPlayer.Nomen = Nomen$
-  newPlayer.Score = Score%
+  newPlayer.score = score%
+  newPlayer.Colr = 15
   SortArray(0) = newPlayer
 END IF
 
@@ -214,29 +219,40 @@ PRINT "", "High Scores"
 PRINT ""
 
 FOR i = 10 TO 1 STEP -1
-  IF SortArray(i).Score = last% THEN
+  IF SortArray(i).score = last% THEN
     place = place - 1
   END IF
-  LOCATE (cnt * 2) + 2, 9
+  COLOR (SortArray(i).Colr), 0
+  LOCATE (cnt * 2) + 1, 9
   PRINT place; ">"
-  LOCATE (cnt * 2) + 2, 15
+  LOCATE (cnt * 2) + 1, 15
   PRINT SortArray(i).Nomen
-  LOCATE (cnt * 2) + 2, 27
-  PRINT SortArray(i).Score,
+  LOCATE (cnt * 2) + 1, 27
+  PRINT SortArray(i).score,
   PRINT ""
   PUT #1, i, SortArray(i)
-  last% = SortArray(i).Score
+  last% = SortArray(i).score
   place = place + 1
   cnt = cnt + 1
 NEXT
 CLOSE #1
-DO
-LOOP WHILE INKEY$ = ""
-END
+COLOR 3
+
+COLOR 4, 0
+LOCATE 23, 4
+PRINT "Press ESC to exit or R to restart"
+WHILE 1
+k$ = INKEY$
+
+IF k$ = CHR$(27) THEN END
+IF k$ = "r" THEN GOTO Restart
+
+WEND
+Restart:
 END SUB
 
 FUNCTION intersects (x1%, y1%, w1%, h1%, x2%, y2%)
-  IF x2% <= x1% + w1% AND x2% >= x1% AND y2% <= y1% + h1% AND y2% >= y1% THEN
+  IF x2% < x1% + w1% AND x2% > x1% AND y2% < y1% + h1% AND y2% > y1% THEN
     intersects = INT(1)
   ELSE
     intersects = INT(0)
@@ -259,7 +275,7 @@ SUB QuickSort (LOW, HIGH)
       ' Only two elements in this subdivision; swap them if they are out of
       ' order, then end recursive calls:
       IF HIGH - LOW = 1 THEN
-         IF SortArray(LOW).Score > SortArray(HIGH).Score THEN
+         IF SortArray(LOW).score > SortArray(HIGH).score THEN
             SWAP SortArray(LOW), SortArray(HIGH)
             'SwapBars Low, High
          END IF
@@ -269,15 +285,15 @@ SUB QuickSort (LOW, HIGH)
          RandIndex = RandInt%(LOW, HIGH)
          SWAP SortArray(HIGH), SortArray(RandIndex)
          'SwapBars High, RandIndex
-         Partition = SortArray(HIGH).Score
+         Partition = SortArray(HIGH).score
          DO
 
             ' Move in from both sides towards the pivot element:
             i = LOW: J = HIGH
-            DO WHILE (i < J) AND (SortArray(i).Score <= Partition)
+            DO WHILE (i < J) AND (SortArray(i).score <= Partition)
                i = i + 1
             LOOP
-            DO WHILE (J > i) AND (SortArray(J).Score >= Partition)
+            DO WHILE (J > i) AND (SortArray(J).score >= Partition)
                J = J - 1
             LOOP
 
