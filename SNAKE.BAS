@@ -11,9 +11,9 @@ SCREEN 7
 CLS
 
 TYPE Player
-  score AS INTEGER
-  Nomen AS STRING * 10
-  Colr AS INTEGER
+    score AS INTEGER
+    Nomen AS STRING * 10
+    Colr AS INTEGER
 END TYPE
 
 DIM SHARED SortArray(10) AS Player
@@ -24,7 +24,7 @@ PRINT "Copytight (c) 2013 Tim Baxendale"
 COLOR 15, 0
 RECT -1, 67, 321, 50, 2
 LOCATE 12, 16
-PRINT "SNAKE 3.0!"
+PRINT "SNAKE 3.1!"
 LOCATE 24, 8
 COLOR 4, 0
 PRINT "Press any key to start..."
@@ -44,8 +44,8 @@ DIM score AS INTEGER
 score = 0
 size% = 5
 FOR i% = 0 TO size%
-  bodyX%(i%) = 140
-  bodyY%(i%) = 80
+    bodyX%(i%) = 140
+    bodyY%(i%) = 80
 NEXT
 
 foodOut% = 0
@@ -53,96 +53,99 @@ DIM foodPos%(1)
 t# = TIMER
 
 WHILE 1
-  'Get the pressed key
-  key$ = INKEY$
-  SELECT CASE key$
-    'CASE CHR$(27)
-    '  END
-    CASE CHR$(0) + "H"
-      IF ymove% <> 10 THEN
-        ymove% = -10
-        xmove% = 0
-      END IF
-    CASE CHR$(0) + "P"
-      IF ymove% <> -10 THEN
-        ymove% = 10
-        xmove% = 0
-      END IF
-    CASE CHR$(0) + "K"
-      IF xmove% <> 10 THEN
-        ymove% = 0
-        xmove% = -10
-      END IF
-    CASE CHR$(0) + "M"
-      IF xmove% <> -10 THEN
-        ymove% = 0
-        xmove% = 10
-      END IF
-    CASE " "
-      LOCATE 1, 1
-      PRINT "Game Paused"
-      DO
-      LOOP WHILE INKEY$ <> " "
-  END SELECT
+    'Get the pressed key
+    key$ = INKEY$
+    DO
+    LOOP WHILE INKEY$ <> ""
+    SELECT CASE key$
+        'CASE CHR$(27)
+        '  END
+        CASE CHR$(0) + "H"
+            IF ymove% <> 10 THEN
+                ymove% = -10
+                xmove% = 0
+            END IF
+        CASE CHR$(0) + "P"
+            IF ymove% <> -10 THEN
+                ymove% = 10
+                xmove% = 0
+            END IF
+        CASE CHR$(0) + "K"
+            IF xmove% <> 10 THEN
+                ymove% = 0
+                xmove% = -10
+            END IF
+        CASE CHR$(0) + "M"
+            IF xmove% <> -10 THEN
+                ymove% = 0
+                xmove% = 10
+            END IF
+        CASE " "
+            LOCATE 1, 1
+            PRINT "Game Paused"
+            DO
+            LOOP WHILE INKEY$ <> " "
+    END SELECT
 
-  'Time for food?
-  IF TIMER - t# > 5 AND foodOut% = 0 THEN
-    t# = TIMER
-    foodOut% = 1
-    foodPos%(0) = Rand(0, 20) * 10
-    foodPos%(1) = Rand(1, 18) * 10
-  END IF
-
-  'Is the food out?
-  IF foodOut% = 1 THEN
-    RECT foodPos%(0) + 1, foodPos%(1) + 1, 8, 8, 4
-    PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 4, 4
-  END IF
-  
-  'Did ya get it?
-  IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0), foodPos%(1)) OR intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0) + 4, foodPos%(1) + 4)) THEN
-    PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 1, 0
-    FOR i% = 0 TO 3
-      size% = size% + 1
-      bodyX%(size%) = bodyX%(size% - 1)
-      bodyY%(size%) = bodyY%(size% - 1)
-    NEXT
-    foodOut% = 0
-    score = score + 5
-    SOUND 300, 1
-  END IF
-
-  'Erase the tail
-  PAINT (bodyX%(0) + 2, bodyY%(0) + 2), 0, 0
-
-  'Sort the body arrays
-  FOR i% = 0 TO size%
-    bodyX%(i%) = bodyX%(i% + 1)
-    bodyY%(i%) = bodyY%(i% + 1)
-  NEXT
-
-  'Move the body
-  bodyX%(size%) = bodyX%(size% - 1) + xmove%
-  bodyY%(size%) = bodyY%(size% - 1) + ymove%
- 
-  'Draw the damn thing
-  RECT bodyX%(size%) + 1, bodyY%(size%) + 1, 8, 8, 1
-  PAINT (bodyX%(size%) + 2, bodyY%(size%) + 2), 1, 1
- 
-  'Don't eat me!
-  FOR i% = size% TO 0 STEP -1
-    'RECT bodyX%(i%) + 1, bodyY%(i%) + 1, 8, 8, 1
-    'PAINT (bodyX%(i%) + 2, bodyY%(i%) + 2), 1, 1
-    IF (i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%)) OR (bodyX%(i%) > 310 OR bodyX%(i%) < 0) OR (bodyY%(i%) > 190 OR bodyY%(i%) < 10) THEN
-      GOTO DEAD
+    'Time for food?
+    IF TIMER - t# > 5 AND foodOut% = 0 THEN
+        t# = TIMER
+        foodOut% = 1
+        foodPos%(0) = Rand(0, 20) * 10
+        foodPos%(1) = Rand(1, 18) * 10
     END IF
-  NEXT
-  delay (2)
 
-  'Show me da score!
-  LOCATE 1, 1
-  PRINT "Score: ", score
-  LINE (0, 9)-(320, 9), 2
+    'Is the food out?
+    IF foodOut% = 1 THEN
+        RECT foodPos%(0) + 1, foodPos%(1) + 1, 8, 8, 4
+        PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 4, 4
+    END IF
+  
+    'Did ya get it?
+    IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0), foodPos%(1)) OR intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0) + 4, foodPos%(1) + 4)) THEN
+        PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 1, 0
+        FOR i% = 0 TO 3
+            size% = size% + 1
+            bodyX%(size%) = bodyX%(size% - 1)
+            bodyY%(size%) = bodyY%(size% - 1)
+        NEXT
+        foodOut% = 0
+        score = score + 5
+        SOUND 300, 1
+    END IF
+
+    'Erase the tail
+    PAINT (bodyX%(0) + 2, bodyY%(0) + 2), 0, 0
+
+    'Sort the body arrays
+    FOR i% = 0 TO size%
+        bodyX%(i%) = bodyX%(i% + 1)
+        bodyY%(i%) = bodyY%(i% + 1)
+    NEXT
+
+    'Move the body
+    bodyX%(size%) = bodyX%(size% - 1) + xmove%
+    bodyY%(size%) = bodyY%(size% - 1) + ymove%
+ 
+    'Draw the damn thing
+    RECT bodyX%(size%) + 1, bodyY%(size%) + 1, 8, 8, 1
+    PAINT (bodyX%(size%) + 2, bodyY%(size%) + 2), 1, 1
+ 
+    'Don't eat me!
+    FOR i% = size% TO 0 STEP -1
+        'RECT bodyX%(i%) + 1, bodyY%(i%) + 1, 8, 8, 1
+        'PAINT (bodyX%(i%) + 2, bodyY%(i%) + 2), 1, 1
+        IF (i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%)) OR (bodyX%(i%) > 310 OR bodyX%(i%) < 0) OR (bodyY%(i%) > 190 OR bodyY%(i%) < 10) THEN
+            GOTO DEAD
+        END IF
+    NEXT
+    delay (2)
+
+    'Show me da score!
+    LOCATE 1, 1
+    PRINT "Score: ", score
+    LINE (0, 9)-(320, 9), 2
+    'RECT 0, 9, 319, 190, 15
 WEND
 
 DEAD:
@@ -160,17 +163,17 @@ HIGHSCORE score
 GOTO START
 
 SUB delay (ticks%)
-  FOR i% = 1 TO ticks%
+FOR i% = 1 TO ticks%
     st# = TIMER
     WHILE TIMER = st#: WEND
-  NEXT i%
+NEXT i%
 END SUB
 
 FUNCTION FOOD ()
         
-  x% = Rand(0, 200)
-  y% = Rand(0, 180)
-  RECT x%, y%, 20, 20, 3
+x% = Rand(0, 200)
+y% = Rand(0, 180)
+RECT x%, y%, 20, 20, 3
   
 END FUNCTION
 
@@ -178,12 +181,12 @@ SUB HIGHSCORE (score%)
 DIM p AS Player
 OPEN "SCORE.DAT" FOR RANDOM AS #1
 IF LOF(1) <= 0 THEN
-  FOR i = 1 TO 10
-    p.Nomen = RandomName$
-    p.score = Rand(1, 20) * 5
-    p.Colr = 1
-    PUT #1, i, p
-  NEXT
+    FOR i = 1 TO 10
+        p.Nomen = RandomName$
+        p.score = Rand(1, 20) * 5
+        p.Colr = 1
+        PUT #1, i, p
+    NEXT
 END IF
 
 CLS
@@ -191,23 +194,23 @@ CLS
 ISHIGHSCORE = 0
 
 FOR i = 1 TO 10
-  GET #1, i, p
-  SortArray(i) = p
-  IF p.score < score% THEN
-    ISHIGHSCORE = 1
-  END IF
+    GET #1, i, p
+    SortArray(i) = p
+    IF p.score < score% THEN
+        ISHIGHSCORE = 1
+    END IF
 NEXT
 
 IF ISHIGHSCORE = 1 THEN
-  DIM newPlayer AS Player
-  PRINT "You got a high score!"
-  DO
-  INPUT "Please enter your name: ", Nomen$
-  LOOP WHILE LEN(Nomen$) = 0 OR LEN(Nomen$) > 10
-  newPlayer.Nomen = Nomen$
-  newPlayer.score = score%
-  newPlayer.Colr = 15
-  SortArray(0) = newPlayer
+    DIM newPlayer AS Player
+    PRINT "You got a high score!"
+    DO
+        INPUT "Please enter your name: ", Nomen$
+    LOOP WHILE LEN(Nomen$) = 0 OR LEN(Nomen$) > 10
+    newPlayer.Nomen = Nomen$
+    newPlayer.score = score%
+    newPlayer.Colr = 15
+    SortArray(0) = newPlayer
 END IF
 
 QuickSort 0, 10
@@ -219,21 +222,21 @@ PRINT "", "High Scores"
 PRINT ""
 
 FOR i = 10 TO 1 STEP -1
-  IF SortArray(i).score = last% THEN
-    place = place - 1
-  END IF
-  COLOR (SortArray(i).Colr), 0
-  LOCATE (cnt * 2) + 1, 9
-  PRINT place; ">"
-  LOCATE (cnt * 2) + 1, 15
-  PRINT SortArray(i).Nomen
-  LOCATE (cnt * 2) + 1, 27
-  PRINT SortArray(i).score,
-  PRINT ""
-  PUT #1, i, SortArray(i)
-  last% = SortArray(i).score
-  place = place + 1
-  cnt = cnt + 1
+    IF SortArray(i).score = last% THEN
+        place = place - 1
+    END IF
+    COLOR (SortArray(i).Colr), 0
+    LOCATE (cnt * 2) + 1, 9
+    PRINT place; ">"
+    LOCATE (cnt * 2) + 1, 15
+    PRINT SortArray(i).Nomen
+    LOCATE (cnt * 2) + 1, 27
+    PRINT SortArray(i).score,
+    PRINT ""
+    PUT #1, i, SortArray(i)
+    last% = SortArray(i).score
+    place = place + 1
+    cnt = cnt + 1
 NEXT
 CLOSE #1
 COLOR 3
@@ -242,21 +245,21 @@ COLOR 4, 0
 LOCATE 23, 4
 PRINT "Press ESC to exit or R to restart"
 WHILE 1
-k$ = INKEY$
+    k$ = INKEY$
 
-IF k$ = CHR$(27) THEN END
-IF k$ = "r" THEN GOTO Restart
+    IF k$ = CHR$(27) THEN END
+    IF k$ = "r" THEN GOTO Restart
 
 WEND
 Restart:
 END SUB
 
 FUNCTION intersects (x1%, y1%, w1%, h1%, x2%, y2%)
-  IF x2% < x1% + w1% AND x2% > x1% AND y2% < y1% + h1% AND y2% > y1% THEN
+IF x2% < x1% + w1% AND x2% > x1% AND y2% < y1% + h1% AND y2% > y1% THEN
     intersects = INT(1)
-  ELSE
+ELSE
     intersects = INT(0)
-  END IF
+END IF
 END FUNCTION
 
 DEFINT A-Z
@@ -270,63 +273,63 @@ DEFINT A-Z
 ' ============================================================================
 '
 SUB QuickSort (LOW, HIGH)
-   IF LOW < HIGH THEN
+IF LOW < HIGH THEN
 
-      ' Only two elements in this subdivision; swap them if they are out of
-      ' order, then end recursive calls:
-      IF HIGH - LOW = 1 THEN
-         IF SortArray(LOW).score > SortArray(HIGH).score THEN
+    ' Only two elements in this subdivision; swap them if they are out of
+    ' order, then end recursive calls:
+    IF HIGH - LOW = 1 THEN
+        IF SortArray(LOW).score > SortArray(HIGH).score THEN
             SWAP SortArray(LOW), SortArray(HIGH)
             'SwapBars Low, High
-         END IF
-      ELSE
+        END IF
+    ELSE
 
-         ' Pick a pivot element at random, then move it to the end:
-         RandIndex = RandInt%(LOW, HIGH)
-         SWAP SortArray(HIGH), SortArray(RandIndex)
-         'SwapBars High, RandIndex
-         Partition = SortArray(HIGH).score
-         DO
+        ' Pick a pivot element at random, then move it to the end:
+        RandIndex = RandInt%(LOW, HIGH)
+        SWAP SortArray(HIGH), SortArray(RandIndex)
+        'SwapBars High, RandIndex
+        Partition = SortArray(HIGH).score
+        DO
 
             ' Move in from both sides towards the pivot element:
             i = LOW: J = HIGH
             DO WHILE (i < J) AND (SortArray(i).score <= Partition)
-               i = i + 1
+                i = i + 1
             LOOP
             DO WHILE (J > i) AND (SortArray(J).score >= Partition)
-               J = J - 1
+                J = J - 1
             LOOP
 
             ' If we haven't reached the pivot element, it means that two
             ' elements on either side are out of order, so swap them:
             IF i < J THEN
-               SWAP SortArray(i), SortArray(J)
-               'SwapBars i, J
+                SWAP SortArray(i), SortArray(J)
+                'SwapBars i, J
             END IF
-         LOOP WHILE i < J
+        LOOP WHILE i < J
 
-         ' Move the pivot element back to its proper place in the array:
-         SWAP SortArray(i), SortArray(HIGH)
-         'SwapBars i, High
+        ' Move the pivot element back to its proper place in the array:
+        SWAP SortArray(i), SortArray(HIGH)
+        'SwapBars i, High
 
-         ' Recursively call the QuickSort procedure (pass the smaller
-         ' subdivision first to use less stack space):
-         IF (i - LOW) < (HIGH - i) THEN
+        ' Recursively call the QuickSort procedure (pass the smaller
+        ' subdivision first to use less stack space):
+        IF (i - LOW) < (HIGH - i) THEN
             QuickSort LOW, i - 1
             QuickSort i + 1, HIGH
-         ELSE
+        ELSE
             QuickSort i + 1, HIGH
             QuickSort LOW, i - 1
-         END IF
-      END IF
-   END IF
+        END IF
+    END IF
+END IF
 END SUB
 
 DEFSNG A-Z
 FUNCTION Rand (Bottom, Top)
-  RANDOMIZE TIMER
-  RANDOMIZE RND
-  Rand = INT((Top - Bottom + 1) * RND + Bottom)
+RANDOMIZE TIMER
+RANDOMIZE RND
+Rand = INT((Top - Bottom + 1) * RND + Bottom)
 END FUNCTION
 
 DEFINT A-Z
@@ -336,65 +339,65 @@ DEFINT A-Z
 ' ============================================================================
 '
 STATIC FUNCTION RandInt% (lower, Upper)
-   RandInt% = INT(RND * (Upper - lower + 1)) + lower
+RandInt% = INT(RND * (Upper - lower + 1)) + lower
 END FUNCTION
 
 DEFSNG A-Z
 FUNCTION RandomName$ ()
-  SELECT CASE Rand(0, 22)
+SELECT CASE Rand(0, 22)
     CASE 0
-      RandomName$ = "Dan"
+        RandomName$ = "Dan"
     CASE 1
-      RandomName$ = "Matt"
+        RandomName$ = "Matt"
     CASE 2
-      RandomName$ = "Annie"
+        RandomName$ = "Annie"
     CASE 3
-      RandomName$ = "Mary C"
+        RandomName$ = "Mary C"
     CASE 4
-      RandomName$ = "Jake"
+        RandomName$ = "Jake"
     CASE 5
-      RandomName$ = "Michael G"
+        RandomName$ = "Michael G"
     CASE 6
-      RandomName$ = "Timothy P"
+        RandomName$ = "Timothy P"
     CASE 7
-      RandomName$ = "Stephen F"
+        RandomName$ = "Stephen F"
     CASE 8
-      RandomName$ = "Joseph P"
+        RandomName$ = "Joseph P"
     CASE 9
-      RandomName$ = "Kate"
+        RandomName$ = "Kate"
     CASE 10
-      RandomName$ = "Peter A"
+        RandomName$ = "Peter A"
     CASE 11
-      RandomName$ = "John C"
+        RandomName$ = "John C"
     CASE 12
-      RandomName$ = "Gracie"
+        RandomName$ = "Gracie"
     CASE 13
-      RandomName$ = "Claire"
+        RandomName$ = "Claire"
     CASE 14
-      RandomName$ = "Frank"
+        RandomName$ = "Frank"
     CASE 15
-      RandomName$ = "Meaghan"
+        RandomName$ = "Meaghan"
     CASE 16
-      RandomName$ = "Maddie"
+        RandomName$ = "Maddie"
     CASE 17
-      RandomName$ = "Andrew"
+        RandomName$ = "Andrew"
     CASE 18
-      RandomName$ = "Jason"
+        RandomName$ = "Jason"
     CASE 19
-      RandomName$ = "Paul"
+        RandomName$ = "Paul"
     CASE 20
-      RandomName$ = "David"
+        RandomName$ = "David"
     CASE 21
-      RandomName$ = "Jon Jon"
+        RandomName$ = "Jon Jon"
     CASE 22
-      RandomName$ = "Emilie"
-  END SELECT
+        RandomName$ = "Emilie"
+END SELECT
 END FUNCTION
 
 SUB RECT (x%, y%, W%, H%, C%)
-  LINE (x%, y%)-(x% + W%, y%), C%
-  LINE (x%, y%)-(x%, y% + H%), C%
-  LINE (x% + W%, y%)-(x% + W%, y% + H%), C%
-  LINE (x%, y% + H%)-(x% + W%, y% + H%), C%
+LINE (x%, y%)-(x% + W%, y%), C%
+LINE (x%, y%)-(x%, y% + H%), C%
+LINE (x% + W%, y%)-(x% + W%, y% + H%), C%
+LINE (x%, y% + H%)-(x% + W%, y% + H%), C%
 END SUB
 
