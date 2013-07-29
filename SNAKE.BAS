@@ -6,7 +6,7 @@ DECLARE FUNCTION intersects! (x1%, y1%, w1%, h1%, x2%, y2%)
 DECLARE FUNCTION FOOD! ()
 DECLARE FUNCTION Rand! (Bottom!, Top!)
 DECLARE SUB delay (ticks%)
-DECLARE SUB RECT (x%, y%, W%, H%, C%)
+DECLARE SUB RECT (X%, y%, W%, H%, C%)
 SCREEN 7
 CLS
 
@@ -24,12 +24,15 @@ PRINT "Copytight (c) 2013 Tim Baxendale"
 COLOR 15, 0
 RECT -1, 67, 321, 50, 2
 LOCATE 12, 16
-PRINT "SNAKE 3.1!"
+PRINT "SNAKE 3.2!"
 LOCATE 24, 8
 COLOR 4, 0
 PRINT "Press any key to start..."
 DO
 LOOP WHILE INKEY$ = ""
+
+DIM wrap%, startSize%, lenIncrease%, foodTime%, dt%, pv%
+GOTO SETTINGS
 
 START:
 
@@ -42,8 +45,8 @@ DIM bodyX%(511)
 DIM bodyY%(511)
 DIM score AS INTEGER
 score = 0
-size% = 5
-FOR i% = 0 TO size%
+size% = startSize%
+FOR i% = size% TO 0 STEP -1
     bodyX%(i%) = 140
     bodyY%(i%) = 80
 NEXT
@@ -51,6 +54,7 @@ NEXT
 foodOut% = 0
 DIM foodPos%(1)
 t# = TIMER
+IsChanged = 0
 
 WHILE 1
     'Get the pressed key
@@ -58,8 +62,8 @@ WHILE 1
     DO
     LOOP WHILE INKEY$ <> ""
     SELECT CASE key$
-        'CASE CHR$(27)
-        '  END
+        CASE CHR$(27)
+          END
         CASE CHR$(0) + "H"
             IF ymove% <> 10 THEN
                 ymove% = -10
@@ -88,7 +92,7 @@ WHILE 1
     END SELECT
 
     'Time for food?
-    IF TIMER - t# > 5 AND foodOut% = 0 THEN
+    IF TIMER - t# > foodTime% AND foodOut% = 0 THEN
         t# = TIMER
         foodOut% = 1
         foodPos%(0) = Rand(0, 20) * 10
@@ -102,44 +106,65 @@ WHILE 1
     END IF
   
     'Did ya get it?
-    IF foodOut% = 1 AND (intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0), foodPos%(1)) OR intersects(bodyX%(size%), bodyY%(size%), 8, 8, foodPos%(0) + 4, foodPos%(1) + 4)) THEN
+    IF foodOut% = 1 AND (intersects(bodyX%(0), bodyY%(0), 8, 8, foodPos%(0), foodPos%(1)) OR intersects(bodyX%(0), bodyY%(0), 8, 8, foodPos%(0) + 4, foodPos%(1) + 4)) THEN
         PAINT (foodPos%(0) + 2, foodPos%(1) + 2), 1, 0
-        FOR i% = 0 TO 3
-            size% = size% + 1
-            bodyX%(size%) = bodyX%(size% - 1)
-            bodyY%(size%) = bodyY%(size% - 1)
-        NEXT
+        size% = size% + lenIncrease%
         foodOut% = 0
-        score = score + 5
+        score = score + pv%
         SOUND 300, 1
+        IsChanged = 1
     END IF
 
     'Erase the tail
-    PAINT (bodyX%(0) + 2, bodyY%(0) + 2), 0, 0
-
-    'Sort the body arrays
-    FOR i% = 0 TO size%
-        bodyX%(i%) = bodyX%(i% + 1)
-        bodyY%(i%) = bodyY%(i% + 1)
-    NEXT
+    IF IsChanged = 0 THEN
+      PAINT (bodyX%(size%) + 2, bodyY%(size%) + 2), 0, 0
+    ELSE
+      IsChanged = 0
+    END IF
 
     'Move the body
-    bodyX%(size%) = bodyX%(size% - 1) + xmove%
-    bodyY%(size%) = bodyY%(size% - 1) + ymove%
- 
-    'Draw the damn thing
-    RECT bodyX%(size%) + 1, bodyY%(size%) + 1, 8, 8, 1
-    PAINT (bodyX%(size%) + 2, bodyY%(size%) + 2), 1, 1
- 
-    'Don't eat me!
+    X = bodyX%(0) + xmove%
+    y = bodyY%(0) + ymove%
+   
+    'Sort the body arrays
     FOR i% = size% TO 0 STEP -1
-        'RECT bodyX%(i%) + 1, bodyY%(i%) + 1, 8, 8, 1
-        'PAINT (bodyX%(i%) + 2, bodyY%(i%) + 2), 1, 1
-        IF (i% <> size% AND bodyX%(i%) = bodyX%(size%) AND bodyY%(i%) = bodyY%(size%)) OR (bodyX%(i%) > 310 OR bodyX%(i%) < 0) OR (bodyY%(i%) > 190 OR bodyY%(i%) < 10) THEN
+        bodyX%(i% + 1) = bodyX%(i%)
+        bodyY%(i% + 1) = bodyY%(i%)
+        IF X = bodyX%(i%) AND y = bodyY%(i%) THEN
+          GOTO DEAD
+        END IF
+        IF X < 0 OR X >= 320 THEN
+          IF wrap% = 0 THEN
             GOTO DEAD
+          ELSE
+            IF X < 0 THEN
+              X = 310
+            ELSE
+              X = 0
+            END IF
+          END IF
+        END IF
+        IF y < 10 OR y >= 200 THEN
+          IF wrap% = 0 THEN
+            GOTO DEAD
+          ELSE
+            IF y < 10 THEN
+              y = 190
+            ELSE
+              y = 10
+            END IF
+          END IF
         END IF
     NEXT
-    delay (2)
+
+    bodyX%(0) = X
+    bodyY%(0) = y
+                 
+    'Draw the damn thing
+    RECT bodyX%(0) + 1, bodyY%(0) + 1, 8, 8, 1
+    PAINT (bodyX%(0) + 2, bodyY%(0) + 2), 1, 1
+ 
+    delay (dt%)
 
     'Show me da score!
     LOCATE 1, 1
@@ -162,6 +187,31 @@ COLOR 15, 0
 HIGHSCORE score
 GOTO START
 
+SETTINGS:
+OPEN "CONFIG.DAT" FOR RANDOM AS #1
+IF LOF(1) <= 0 THEN
+  wrap% = 0
+  PUT #1, 1, wrap%
+  startSize% = 4
+  PUT #1, 2, startSize%
+  lenIncrease% = 3
+  PUT #1, 3, lenIncrease%
+  foodTime% = 5
+  PUT #1, 4, foodTime%
+  dt% = 1
+  PUT #1, 5, dt%
+  pv% = 5
+  PUT #1, 6, pv%
+END IF
+GET #1, 1, wrap%
+GET #1, 2, startSize%
+GET #1, 3, lenIncrease%
+GET #1, 4, foodTime%
+GET #1, 5, dt%
+GET #1, 6, pv%
+CLOSE #1
+GOTO START
+
 SUB delay (ticks%)
 FOR i% = 1 TO ticks%
     st# = TIMER
@@ -171,9 +221,9 @@ END SUB
 
 FUNCTION FOOD ()
         
-x% = Rand(0, 200)
+X% = Rand(0, 200)
 y% = Rand(0, 180)
-RECT x%, y%, 20, 20, 3
+RECT X%, y%, 20, 20, 3
   
 END FUNCTION
 
@@ -394,10 +444,10 @@ SELECT CASE Rand(0, 22)
 END SELECT
 END FUNCTION
 
-SUB RECT (x%, y%, W%, H%, C%)
-LINE (x%, y%)-(x% + W%, y%), C%
-LINE (x%, y%)-(x%, y% + H%), C%
-LINE (x% + W%, y%)-(x% + W%, y% + H%), C%
-LINE (x%, y% + H%)-(x% + W%, y% + H%), C%
+SUB RECT (X%, y%, W%, H%, C%)
+LINE (X%, y%)-(X% + W%, y%), C%
+LINE (X%, y%)-(X%, y% + H%), C%
+LINE (X% + W%, y%)-(X% + W%, y% + H%), C%
+LINE (X%, y% + H%)-(X% + W%, y% + H%), C%
 END SUB
 
