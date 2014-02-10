@@ -1,3 +1,4 @@
+DECLARE SUB ChangeSound (snd%)
 DECLARE FUNCTION GetMaxPV% (incr%, init%, wrap%)
 DECLARE SUB ChangePval (pval%)
 DECLARE SUB CreateFancyBox ()
@@ -47,8 +48,13 @@ LOCATE 12, 45
 PRINT CHR$(17)
 
 LOCATE 13, 28
-PRINT "SAVE AND EXIT"
+PRINT "SOUND         :"
+LOCATE 13, 45
+PRINT CHR$(17)
+
 LOCATE 14, 28
+PRINT "SAVE AND EXIT"
+LOCATE 15, 28
 PRINT "EXIT WITHOUT SAVING"
 
 GET #1, 1, wrap%
@@ -57,6 +63,7 @@ GET #1, 3, incr%
 GET #1, 4, time%
 GET #1, 5, dela%
 GET #1, 6, pval%
+GET #1, 7, snd%
 
 ChangeWrap wrap%
 ChangeInit init%
@@ -64,6 +71,7 @@ ChangeIncr incr%
 ChangeTime time%
 ChangeDela dela%
 ChangePval pval%
+ChangeSound snd%
 
 LOCATE 7, 51
 PRINT CHR$(16)
@@ -76,6 +84,8 @@ PRINT CHR$(16)
 LOCATE 11, 51
 PRINT CHR$(16)
 LOCATE 12, 51
+PRINT CHR$(16)
+LOCATE 13, 51
 PRINT CHR$(16)
 selected = 0
 
@@ -94,7 +104,7 @@ WHILE 1
     LOCATE 7 + selected, 25
     PRINT " "
     selected = selected + 1
-    IF selected > 7 THEN
+    IF selected > 8 THEN
       selected = 0
     END IF
     LOCATE 7 + selected, 25
@@ -104,7 +114,7 @@ WHILE 1
     PRINT " "
     selected = selected - 1
     IF selected < 0 THEN
-      selected = 7
+      selected = 8
     END IF
     LOCATE 7 + selected, 25
     PRINT "*"
@@ -195,17 +205,20 @@ SELECT CASE selected
       END IF
     END IF
     ChangePval pval%
-                  
   CASE 6
+    snd% = (snd% + 1) MOD 2
+    ChangeSound snd%
+  CASE 7
     PUT #1, 1, wrap%
     PUT #1, 2, init%
     PUT #1, 3, incr%
     PUT #1, 4, time%
     PUT #1, 5, dela%
     PUT #1, 6, pval%
+    PUT #1, 7, snd%
     CLOSE #1
     END
-  CASE 7
+  CASE 8
     CLOSE #1
     END
 END SELECT
@@ -240,6 +253,15 @@ LOCATE 12, 47
 PRINT pval%
 END SUB
 
+SUB ChangeSound (snd%)
+    LOCATE 13, 47
+    IF snd% = 0 THEN
+        PRINT "OFF"
+    ELSE
+        PRINT "ON "
+    END IF
+END SUB
+
 SUB ChangeTime (time%)
 LOCATE 10, 47
 PRINT "  "
@@ -265,22 +287,22 @@ LOCATE 6, 22
 PRINT CHR$(201)
 LOCATE 6, 54
 PRINT CHR$(183)
-LOCATE 15, 22
+LOCATE 16, 22
 PRINT CHR$(200)
-LOCATE 15, 55
+LOCATE 16, 55
 PRINT CHR$(188)
 
 FOR i% = 0 TO 31
 LOCATE 6, 23 + i%
 PRINT CHR$(205)
-LOCATE 15, 23 + i%
+LOCATE 16, 23 + i%
 PRINT CHR$(205)
 NEXT
 
 LOCATE 6, 55
 PRINT CHR$(187)
 
-FOR i% = 0 TO 7
+FOR i% = 0 TO 8
 LOCATE 7 + i%, 22
 PRINT CHR$(186)
 LOCATE 7 + i%, 55

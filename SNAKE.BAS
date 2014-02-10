@@ -20,7 +20,7 @@ DIM SHARED SortArray(10) AS Player
 
 LOCATE 2, 5
 COLOR 1, 0
-PRINT "Copytight (c) 2013 Tim Baxendale"
+PRINT "Copyright (c) 2013 Tim Baxendale"
 COLOR 15, 0
 RECT -1, 67, 321, 50, 2
 LOCATE 12, 16
@@ -111,7 +111,7 @@ WHILE 1
         size% = size% + lenIncrease%
         foodOut% = 0
         score = score + pv%
-        SOUND 300, 1
+        IF snd% = 1 THEN SOUND 300, 1
         IsChanged = 1
     END IF
 
@@ -178,7 +178,7 @@ PALETTE 0, 4
 COLOR 15, 4
 LOCATE 12, 16
 PRINT "You Died!"
-SOUND 37, 18
+IF snd% = 1 THEN SOUND 37, 18
 LOCATE 23, 7
 PRINT "Press space to continue..."
 DO
@@ -202,6 +202,8 @@ IF LOF(1) <= 0 THEN
   PUT #1, 5, dt%
   pv% = 5
   PUT #1, 6, pv%
+  snd% = 1
+  PUT #1, 7, snd%
 END IF
 GET #1, 1, wrap%
 GET #1, 2, startSize%
@@ -209,6 +211,7 @@ GET #1, 3, lenIncrease%
 GET #1, 4, foodTime%
 GET #1, 5, dt%
 GET #1, 6, pv%
+GET #1, 7, snd%
 CLOSE #1
 GOTO START
 
