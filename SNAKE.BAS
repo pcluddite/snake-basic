@@ -24,7 +24,7 @@ PRINT "Copyright (c) 2013 Tim Baxendale"
 COLOR 15, 0
 RECT -1, 67, 321, 50, 2
 LOCATE 12, 16
-PRINT "SNAKE 3.2!"
+PRINT "SNAKE 3.3!"
 LOCATE 24, 8
 COLOR 4, 0
 PRINT "Press any key to start..."
